@@ -136,8 +136,8 @@ function callUser(userID) {
 
 	return (
 		<div>
-			<video autoPlay muted ref={userVideo} />
-			<video autoPlay ref={partnerVideo} />
+			<video playsInline autoPlay muted ref={userVideo} />
+			<video  playsInline autoPlay ref={partnerVideo} />
 		</div>
 	);
 };
