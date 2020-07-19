@@ -4,8 +4,14 @@ const app = express();
 const server = http.createServer(app);
 const socket = require('socket.io');
 const io = socket(server);
+const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const rooms = {};
+
+app.use(cookieParser())
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 // On server connection, new socket object
 io.on("connection", socket => {
@@ -44,6 +50,11 @@ io.on("connection", socket => {
   socket.on("ice-candidate", incoming => {
     io.to(incoming.target).emit("ice-candidate", incoming.candidate);
 });
+});
+
+
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
 
