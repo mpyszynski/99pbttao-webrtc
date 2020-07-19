@@ -1,0 +1,23 @@
+{
+  "name": "webrtcintro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=development babel-node ./src/bin/www",
+    "start": "NODE_ENV=production npm run build && node ./build/bin/www",
+    "build": "npm run clean && npm run babel-build",
+    "babel-build": "babel -d ./build ./src -s",
+    "clean": "rm -rf ./build && mkdir build",
+    "heroku-postbuild": "cd client && npm install && npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "express": "^4.17.1",
+    "socket.io": "^2.3.0"
+  }
+}
