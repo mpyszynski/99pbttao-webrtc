@@ -136,7 +136,7 @@ function callUser(userID) {
 
 	return (
 		<div>
-			<video autoPlay ref={userVideo} />
+			<video autoPlay muted ref={userVideo} />
 			<video autoPlay ref={partnerVideo} />
 		</div>
 	);
