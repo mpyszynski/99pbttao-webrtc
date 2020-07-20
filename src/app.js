@@ -1,4 +1,5 @@
 const express = require('express');
+
 const http = require('http');
 const app = express();
 const server = http.createServer(app);
@@ -6,12 +7,24 @@ const socket = require('socket.io');
 const io = socket(server);
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+require('dotenv').config()
 
 const rooms = {};
 
-app.use(cookieParser())
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile'] }));
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect('/');
+  });
 
 // On server connection, new socket object
 io.on("connection", socket => {
@@ -25,7 +38,7 @@ io.on("connection", socket => {
       rooms[roomID] = [socket.id];
     }
 
-    // Is there somebody in the room? See if  there is an id in that array that is not ours
+    // Is there somebody in the room? See if there is an id in that array that is not ours
     const otherUser = rooms[roomID].find(id => id !== socket.id);
     // Let ourselves know that there is a user in the room, and the other user that we are joining
     if  (otherUser) {

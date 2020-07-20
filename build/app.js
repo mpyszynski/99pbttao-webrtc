@@ -6,8 +6,14 @@ var app = express();
 var server = http.createServer(app);
 var socket = require('socket.io');
 var io = socket(server);
+var cookieParser = require('cookie-parser');
+var path = require('path');
 
 var rooms = {};
+
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 // On server connection, new socket object
 io.on("connection", function (socket) {
@@ -21,7 +27,7 @@ io.on("connection", function (socket) {
       rooms[roomID] = [socket.id];
     }
 
-    // Is there somebody in the room? See if  there is an id in that array that is not ours
+    // Is there somebody in the room? See if there is an id in that array that is not ours
     var otherUser = rooms[roomID].find(function (id) {
       return id !== socket.id;
     });
@@ -48,6 +54,10 @@ io.on("connection", function (socket) {
   socket.on("ice-candidate", function (incoming) {
     io.to(incoming.target).emit("ice-candidate", incoming.candidate);
   });
+});
+
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
 module.exports = { app: app, server: server };
