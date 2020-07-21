@@ -1,6 +1,8 @@
 'use strict';
 
 var express = require('express');
+var connectDB = require('../config/db.js');
+var mongoose = require('mongoose');
 var http = require('http');
 var app = express();
 var server = http.createServer(app);
@@ -8,13 +10,42 @@ var socket = require('socket.io');
 var io = socket(server);
 var cookieParser = require('cookie-parser');
 var path = require('path');
+var GoogleStrategy = require('passport-google-oauth20').Strategy;
+var passport = require('passport');
+var session = require('express-session');
+var MongoStore = require('connect-mongo')(session);
+var cors = require('cors');
+
+require('dotenv').config({
+  path: './config/config.env'
+});
+require('../config/passport')(passport);
+
+connectDB();
 
 var rooms = {};
 
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 
+// Sessions
+app.use(session({
+  secret: 'keyboard puppy',
+  resave: false,
+  saveUninitialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
+}));
+
+// Passport middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use('/auth', require('../routes/auth'));
 // On server connection, new socket object
 io.on("connection", function (socket) {
   // Attach event listener "join room", pull roomID off url
