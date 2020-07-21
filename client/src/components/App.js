@@ -7,8 +7,8 @@ import Navbar from './Navbar';
 function App() {
   return (
     <div className="App">
-      <Navbar />
     <BrowserRouter>
+      <Navbar />
       <Switch>
         <Route path="/" exact component={CreateRoom} />
         <Route path="/room/:roomID" component={Room} />

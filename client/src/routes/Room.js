@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import io from 'socket.io-client';
 
 const Room = props => {
+	const [inRoom, setRoom] = useState('');
 	const userVideo = useRef();
 	const partnerVideo = useRef();
 	const peerRef = useRef();
@@ -16,7 +17,7 @@ const Room = props => {
       userStream.current = stream;
 
       socketRef.current = io.connect("/");
-      socketRef.current.emit("join room", props.match.params.roomID);
+			socketRef.current.emit("join room", props.match.params.roomID);
 
       socketRef.current.on('other user', userID => {
           callUser(userID);
@@ -33,9 +34,11 @@ const Room = props => {
 
       socketRef.current.on("ice-candidate", handleNewICECandidateMsg);
   });
-
+	return () => { 
+		socketRef.current.emit("leaving room", props.match.params.roomID);
+		userStream.current.getTracks().forEach(track => track.stop());
+	}
 }, []);
-
 
 function callUser(userID) {
   peerRef.current = createPeer(userID);
@@ -131,13 +134,15 @@ function callUser(userID) {
 	}
 
 	function handleTrackEvent(e) {
-		partnerVideo.current.srcObject = e.streams[0];
+		if (partnerVideo !== null || partnerVideo.current !== null) {
+			partnerVideo.current.srcObject = e.streams[0];
+		}
 	}
 
 	return (
 		<div>
 			<video playsInline autoPlay muted ref={userVideo} />
-			<video  playsInline autoPlay ref={partnerVideo} />
+			<video playsInline autoPlay ref={partnerVideo} />
 		</div>
 	);
 };
